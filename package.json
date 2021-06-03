@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "dev": "nodemon app.js"
+    "start": "nodemon app.js",
+    "dev": "nodemon app.js",
+    "lint": "eslint --fix --ext .js,.jsx ."
   },
   "repository": {
     "type": "git",
@@ -36,7 +37,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "eslint": "^7.2.0",
+    "eslint": "^7.27.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",

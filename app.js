@@ -1,13 +1,19 @@
-const express = require("express");
-const mongoose = require("mongoose");
+const express = require('express');
+const mongoose = require('mongoose');
+const {
+  mongoUrl, mongoParams,
+} = require('./utils/mongo-adress');
+
 const { PORT = 3005 } = process.env;
 const app = express();
+const router = require('./routes');
 
-mongoose.connect("mongodb://localhost:27017/filmsexplorer", {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-});
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+mongoose.connect(mongoUrl, mongoParams);
+
+app.use(router);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
