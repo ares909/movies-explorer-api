@@ -45,18 +45,17 @@ const deleteMovie = (req, res, next) => {
     .orFail(() => new ForbiddenError(messages.movie.id.movieNotFound))
     .then((movie) => {
       if (movie.owner.toString() !== req.user._id) {
-        next(new ForbiddenError(messages.movie.id.userNotFound));
-      } else {
-        return Movie.deleteOne(movie)
-          .then(() => res.send({ message: messages.movie.onDelete }))
-          .catch((err) => {
-            if (err.name === 'ValidationError' || err.name === 'CastError') {
-              next(new BadRequestError(messages.movie.isValid));
-            } else {
-              next(err);
-            }
-          });
+        return new ForbiddenError(messages.movie.id.userNotFound);
       }
+      return Movie.deleteOne(movie)
+        .then(() => res.send({ message: messages.movie.onDelete }))
+        .catch((err) => {
+          if (err.name === 'ValidationError' || err.name === 'CastError') {
+            next(new BadRequestError(messages.movie.isValid));
+          } else {
+            next(err);
+          }
+        });
     })
 
     .catch(next);
