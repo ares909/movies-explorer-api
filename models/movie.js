@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
     required: true,
+    select: false,
   },
 
   nameRU: {
@@ -52,6 +53,10 @@ const userSchema = new mongoose.Schema({
   },
   nameEN: {
     type: String,
+    required: true,
+  },
+  movieId: {
+    type: Number,
     required: true,
   },
   __v: {

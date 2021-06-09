@@ -40,6 +40,7 @@ router.post(
         .custom(validateUrl, 'custom validation'),
       nameRU: Joi.string().trim(true).required(),
       nameEN: Joi.string().trim(true).required(),
+      movieId: Joi.number().required(),
     }),
   }),
   createMovie,

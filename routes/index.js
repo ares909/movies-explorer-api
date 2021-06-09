@@ -18,7 +18,7 @@ router.use(middlewares);
 router.use('/users', auth, users);
 router.use('/movies', auth, movies);
 
-router.use(
+router.post(
   '/signup',
   celebrate({
     body: Joi.object().keys({
@@ -33,15 +33,15 @@ router.use(
   }),
   createUser,
 );
-router.use('/signin', celebrate({
+router.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(validatePassword, 'custom validation'),
   }),
 }), login);
 
-router.use('/logout', logout);
-router.use(() => {
+router.post('/logout', logout);
+router.use('*', auth, () => {
   throw new NotFoundError(messages.route.isExist);
 });
 router.use(errorLogger);

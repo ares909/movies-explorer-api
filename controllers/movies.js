@@ -1,17 +1,18 @@
 const Movie = require('../models/movie');
 const messages = require('../utils/messages');
-const NotFoundError = require('../errors/notfound');
+const ForbiddenError = require('../errors/forbidden');
 const BadRequestError = require('../errors/badrequest');
 
 const getMovies = (req, res, next) => {
-  Movie.find({})
-    .then((cards) => res.send(cards))
+  Movie.find({ owner: req.user._id })
+    .then((movies) => res.send(movies))
     .catch(next);
 };
 
 const createMovie = (req, res, next) => {
   const {
     country, director, duration, year, description, image, trailer, thumbnail, nameRU, nameEN,
+    movieId,
   } = req.body;
   const owner = req.user._id;
   Movie.create({
@@ -26,6 +27,7 @@ const createMovie = (req, res, next) => {
     nameEN,
     thumbnail,
     owner,
+    movieId,
   })
     .then((movie) => res.send(movie))
     .catch((err) => {
@@ -38,22 +40,26 @@ const createMovie = (req, res, next) => {
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.findOneAndDelete({ _id: req.params.movieId })
-    .orFail(() => new NotFoundError(messages.movie.id.movieNotFound))
+  Movie.findById({ _id: req.params.movieId })
+    .select('+owner')
+    .orFail(() => new ForbiddenError(messages.movie.id.movieNotFound))
     .then((movie) => {
-      if (movie.owner._id.toString() !== req.user._id) {
-        next(new NotFoundError(messages.movie.id.userNotFound));
+      if (movie.owner.toString() !== req.user._id) {
+        next(new ForbiddenError(messages.movie.id.userNotFound));
+      } else {
+        return Movie.deleteOne(movie)
+          .then(() => res.send({ message: messages.movie.onDelete }))
+          .catch((err) => {
+            if (err.name === 'ValidationError' || err.name === 'CastError') {
+              next(new BadRequestError(messages.movie.isValid));
+            } else {
+              next(err);
+            }
+          });
       }
     })
 
-    .then(() => res.send({ message: messages.movie.onDelete }))
-    .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new BadRequestError(messages.movie.isValid));
-      } else {
-        next(err);
-      }
-    });
+    .catch(next);
 };
 
 module.exports = {

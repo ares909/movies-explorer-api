@@ -10,12 +10,6 @@ const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SOLT_ROUNDS = 10;
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch(next);
-};
-
 const getUser = (req, res, next) => {
   User.findOne({ _id: req.user })
     .orFail(() => new NotFoundError(messages.user.id.userNotFound))
@@ -40,12 +34,11 @@ const createUser = (req, res, next) => {
       email: user.email,
     }))
     .catch((err) => {
-      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE || err.name === 'MongoError') {
         next(new ConflictError(messages.user.sameData));
       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError(messages.user.isValid));
       }
-      next(err);
     });
 };
 
@@ -62,11 +55,12 @@ const updateUser = (req, res, next) => {
     },
   ).then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+        next(new ConflictError(messages.user.sameData));
+      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError(messages.user.isValid));
-      } else {
-        next(err);
       }
+      next(err);
     });
 };
 
@@ -83,22 +77,17 @@ const login = (req, res, next) => {
         // sameSite: 'none',
       });
 
-      res.send(user.email);
+      res.send({ email: user.email });
     })
     .catch(next);
 };
 
 const logout = (req, res) => {
-  res.cookie('jwt', 'token', {
-    maxAge: 0,
-    httpOnly: true,
-    // secure: true,
-    // sameSite: 'none',
-  });
+  res.clearCookie('jwt');
   res.send({ message: messages.logout.onLogout })
     .end();
 };
 
 module.exports = {
-  getUsers, createUser, getUser, updateUser, login, logout,
+  createUser, getUser, updateUser, login, logout,
 };

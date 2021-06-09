@@ -4,6 +4,7 @@ const messages = {
   },
   movie: {
     isValid: 'Введите корректные данные',
+    isLinkValid: 'Некорректная ссылка',
     id: {
       movieNotFound: 'Нет файла с таким id',
       userNotFound: 'Id пользователя не совпадает с владельцем файла',
@@ -14,6 +15,8 @@ const messages = {
   user: {
     isValid: 'Введите корректные данные',
     allFilled: 'Не передан email или пароль',
+    isEmailValid: 'Некорректный email',
+    password: 'Некорректный пароль',
     id: {
       userNotFound: 'Нет пользователя с таким id',
     },
