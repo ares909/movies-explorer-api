@@ -34,10 +34,12 @@ const createUser = (req, res, next) => {
       email: user.email,
     }))
     .catch((err) => {
-      if (err.code === MONGO_DUPLICATE_ERROR_CODE || err.name === 'MongoError') {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE && err.name === 'MongoError') {
         next(new ConflictError(messages.user.sameData));
       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError(messages.user.isValid));
+      } else {
+        next(err);
       }
     });
 };
@@ -55,12 +57,13 @@ const updateUser = (req, res, next) => {
     },
   ).then((user) => res.send(user))
     .catch((err) => {
-      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE && err.name === 'MongoError') {
         next(new ConflictError(messages.user.sameData));
       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError(messages.user.isValid));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 

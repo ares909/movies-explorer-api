@@ -29,7 +29,20 @@ const createMovie = (req, res, next) => {
     owner,
     movieId,
   })
-    .then((movie) => res.send(movie))
+    .then((movie) => res.send({
+      country: movie.country,
+      director: movie.director,
+      duration: movie.duration,
+      year: movie.year,
+      description: movie.description,
+      image: movie.image,
+      trailer: movie.trailer,
+      nameRU: movie.nameRU,
+      nameEN: movie.nameEN,
+      thumbnail: movie.thumbnail,
+      movieId: movie.movieId,
+
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
         next(new BadRequestError(messages.movie.isValid));
@@ -45,7 +58,7 @@ const deleteMovie = (req, res, next) => {
     .orFail(() => new ForbiddenError(messages.movie.id.movieNotFound))
     .then((movie) => {
       if (movie.owner.toString() !== req.user._id) {
-        return new ForbiddenError(messages.movie.id.userNotFound);
+        throw new ForbiddenError(messages.movie.id.userNotFound);
       }
       return Movie.deleteOne(movie)
         .then(() => res.send({ message: messages.movie.onDelete }))
