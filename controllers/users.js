@@ -86,7 +86,12 @@ const login = (req, res, next) => {
 };
 
 const logout = (req, res) => {
-  res.clearCookie('jwt');
+  res.cookie('jwt', 'token', {
+    maxAge: 0,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+  });
   res.send({ message: messages.logout.onLogout })
     .end();
 };
